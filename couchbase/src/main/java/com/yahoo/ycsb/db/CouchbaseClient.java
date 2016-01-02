@@ -96,7 +96,9 @@ public class CouchbaseClient extends DB {
 
     persistTo = parsePersistTo(props.getProperty(PERSIST_PROPERTY, "0"));
     replicateTo = parseReplicateTo(props.getProperty(REPLICATE_PROPERTY, "0"));
-
+    
+    System.out.printf("Run couchbase.url=%s\n couchbase.bucket=%s\n couchbase.password=%s\n",url, bucket,(password == "") ? "Empty_Password":password );
+    
     Properties systemProperties = System.getProperties();
     systemProperties.put("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.SLF4JLogger");
     System.setProperties(systemProperties);
