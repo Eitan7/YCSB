@@ -16,7 +16,7 @@
  */
 
 /**
- * The YCSB binding for dns.
+ * The YCSB binding for DNS.
  */
 package com.yahoo.ycsb.db;
 

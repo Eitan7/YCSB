@@ -29,6 +29,9 @@ import java.util.HashMap;
 //import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.net.InetAddress;
+import java.util.UUID;
+
 
 /**
  * ElasticSearch client for YCSB framework.
@@ -60,82 +63,10 @@ public class DNS extends DB {
   @Override
   public void init() throws DBException {
     // initialize OrientDB driver
-  /*  Properties props = getProperties();
-    this.indexKey = props.getProperty("es.index.key", DEFAULT_INDEX_KEY);
-    String clusterName =
-        props.getProperty("cluster.name", DEFAULT_CLUSTER_NAME);
-    // Check if transport client needs to be used (To connect to multiple
-    // elasticsearch nodes)
-    remoteMode = Boolean
-        .parseBoolean(props.getProperty("elasticsearch.remote", "false"));
-    Boolean newdb =
-        Boolean.parseBoolean(props.getProperty("elasticsearch.newdb", "false"));
-    Builder settings = settingsBuilder().put("node.local", "true")
-        .put("path.data", System.getProperty("java.io.tmpdir") + "/esdata")
-        .put("discovery.zen.ping.multicast.enabled", "false")
-        .put("index.mapping._id.indexed", "true")
-        .put("index.gateway.type", "none").put("gateway.type", "none")
-        .put("index.number_of_shards", "1")
-        .put("index.number_of_replicas", "0");
-
-    // if properties file contains elasticsearch user defined properties
-    // add it to the settings file (will overwrite the defaults).
-    settings.put(props);
-    System.out.println(
-        "ElasticSearch starting node = " + settings.get("cluster.name"));
-    System.out
-        .println("ElasticSearch node data path = " + settings.get("path.data"));
-    System.out.println("ElasticSearch Remote Mode = " + remoteMode);
-    // Remote mode support for connecting to remote elasticsearch cluster
-    if (remoteMode) {
-      settings.put("client.transport.sniff", true)
-          .put("client.transport.ignore_cluster_name", false)
-          .put("client.transport.ping_timeout", "30s")
-          .put("client.transport.nodes_sampler_interval", "30s");
-      // Default it to localhost:9300
-      String[] nodeList =
-          props.getProperty("elasticsearch.hosts.list", DEFAULT_REMOTE_HOST)
-              .split(",");
-      System.out.println("ElasticSearch Remote Hosts = "
-          + props.getProperty("elasticsearch.hosts.list", DEFAULT_REMOTE_HOST));
-      TransportClient tClient = new TransportClient(settings);
-      for (String h : nodeList) {
-        String[] nodes = h.split(":");
-        tClient.addTransportAddress(
-            new InetSocketTransportAddress(nodes[0], 
-                Integer.parseInt(nodes[1])));
-      }
-      client = tClient;
-    } else { // Start node only if transport client mode is disabled
-      node = nodeBuilder().clusterName(clusterName).settings(settings).node();
-      node.start();
-      client = node.client();
-    }
-
-    if (newdb) {
-      client.admin().indices().prepareDelete(indexKey).execute().actionGet();
-      client.admin().indices().prepareCreate(indexKey).execute().actionGet();
-    } else {
-      boolean exists = client.admin().indices()
-          .exists(Requests.indicesExistsRequest(indexKey)).actionGet()
-          .isExists();
-      if (!exists) {
-        client.admin().indices().prepareCreate(indexKey).execute().actionGet();
-      }
-    }*/
   }
 
   @Override
   public void cleanup() throws DBException {
-   /* if (!remoteMode) {
-      if (!node.isClosed()) {
-        client.close();
-        node.stop();
-        node.close();
-      }
-    } else {
-      client.close();
-    }*/
   }
 
   /**
@@ -155,23 +86,6 @@ public class DNS extends DB {
   @Override
   public Status insert(String table, String key,
       HashMap<String, ByteIterator> values) {
-    /*try {
-      final XContentBuilder doc = jsonBuilder().startObject();
-
-      for (Entry<String, String> entry : StringByteIterator.getStringMap(values)
-          .entrySet()) {
-        doc.field(entry.getKey(), entry.getValue());
-      }
-
-      doc.endObject();
-
-      client.prepareIndex(indexKey, table, key).setSource(doc).execute()
-          .actionGet();
-
-      return Status.OK;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
     return Status.ERROR;
   }
 
@@ -187,12 +101,6 @@ public class DNS extends DB {
    */
   @Override
   public Status delete(String table, String key) {
-  /*  try {
-      client.prepareDelete(indexKey, table, key).execute().actionGet();
-      return Status.OK;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
     return Status.ERROR;
   }
 
@@ -213,27 +121,18 @@ public class DNS extends DB {
   @Override
   public Status read(String table, String key, Set<String> fields,
       HashMap<String, ByteIterator> result) {
-   /* try {
-      final GetResponse response =
-          client.prepareGet(indexKey, table, key).execute().actionGet();
-
-      if (response.isExists()) {
-        if (fields != null) {
-          for (String field : fields) {
-            result.put(field, new StringByteIterator(
-                (String) response.getSource().get(field)));
-          }
-        } else {
-          for (String field : response.getSource().keySet()) {
-            result.put(field, new StringByteIterator(
-                (String) response.getSource().get(field)));
-          }
-        }
-        return Status.OK;
+    try {
+      String uuid = UUID.randomUUID().toString();
+      String strDns = "router" + uuid.substring(0, 4) + ".consul.service";
+      try {
+        InetAddress address = InetAddress.getByName(strDns);
+      } catch (java.net.UnknownHostException e) {
+                     return Status.OK;
       }
+      return Status.OK;
     } catch (Exception e) {
       e.printStackTrace();
-    }*/
+    }
     return Status.ERROR;
   }
 
@@ -254,25 +153,13 @@ public class DNS extends DB {
   @Override
   public Status update(String table, String key,
       HashMap<String, ByteIterator> values) {
-   /* try {
-      final GetResponse response =
-          client.prepareGet(indexKey, table, key).execute().actionGet();
-
-      if (response.isExists()) {
-        for (Entry<String, String> entry : StringByteIterator
-            .getStringMap(values).entrySet()) {
-          response.getSource().put(entry.getKey(), entry.getValue());
-        }
-
-        client.prepareIndex(indexKey, table, key)
-            .setSource(response.getSource()).execute().actionGet();
-
-        return Status.OK;
+    try {
+          String strDns = "router" + ".consul.service";
+          InetAddress address = InetAddress.getByName(strDns);
+          return Status.OK;
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
     return Status.ERROR;
   }
 
@@ -297,29 +184,6 @@ public class DNS extends DB {
   @Override
   public Status scan(String table, String startkey, int recordcount,
       Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
-  /*  try {
-      final RangeFilterBuilder filter = rangeFilter("_id").gte(startkey);
-      final SearchResponse response = client.prepareSearch(indexKey)
-          .setTypes(table).setQuery(matchAllQuery()).setFilter(filter)
-          .setSize(recordcount).execute().actionGet();
-
-      HashMap<String, ByteIterator> entry;
-
-      for (SearchHit hit : response.getHits()) {
-        entry = new HashMap<String, ByteIterator>(fields.size());
-
-        for (String field : fields) {
-          entry.put(field,
-              new StringByteIterator((String) hit.getSource().get(field)));
-        }
-
-        result.add(entry);
-      }
-
-      return Status.OK;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
     return Status.ERROR;
   }
 }

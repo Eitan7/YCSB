@@ -25,11 +25,12 @@ LICENSE file.
         <relativePath>../binding-parent</relativePath>
     </parent>
 
-    <artifactId>dns-binding</artifactId>
-    <name>dns Binding</name>
+    <artifactId>DNS-binding</artifactId>
+    <name>DNS Binding</name>
     <packaging>jar</packaging>
     <properties>
         <elasticsearch-version>0.19.8</elasticsearch-version>
+        <checkstyle.skip>true</checkstyle.skip>
     </properties>
     <dependencies>
         <dependency>
